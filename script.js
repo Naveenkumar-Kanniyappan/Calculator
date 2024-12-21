@@ -1,39 +1,67 @@
+let string = "";
 let input = document.getElementById('display');
 let buttons = document.querySelectorAll('button');
-let string = "";
 
 Array.from(buttons).forEach((button) => {
     button.addEventListener('click', (e) => {
         const buttonText = e.target.innerHTML;
-        if (buttonText === '=') {
+        if (buttonText === "=") {
             try {
-                if (string.includes('%')) {
-                    let parts = string.split('%');
-                    if (parts.length === 2) {
-                        let num1 = parseFloat(parts[0]);
-                        let num2 = parseFloat(parts[1]);
-                        string = (num1 * (num2 / 100)).toString();
-                    } 
-                    else {
-                        alert("Error")
+                let expression = string.replace(/x/g, '*');
+                if (expression.includes('%')) {
+                    let arr = expression.match(/(\d+|[+\-*/%])/g);
+
+                    for (let i = 0; i < arr.length; i++) {
+                        let operator = arr[i];
+                        let num1 = parseInt(arr[i - 1]);
+                        let num2 = parseInt(arr[i + 1]);
+
+                        if (operator === "%") {
+                            arr[i + 1] = (num1 * (num2 / 100)).toString();
+                            arr.splice(i - 1, 2);
+                            i--;
+                        } else if (operator === "*") {
+                            arr[i + 1] = (num1 * num2).toString();
+                            arr.splice(i - 1, 2);
+                            i--;
+                        } else if (operator === "/") {
+                            arr[i + 1] = (num1 / num2).toString();
+                            arr.splice(i - 1, 2);
+                            i--;
+                        }
                     }
-                } 
-                else {
-                    string = eval(string.replace('x', '*'));
+
+                    let result = parseInt(arr[0]);
+                    for (let i = 1; i < arr.length; i++) {
+                        let operator = arr[i];
+                        let num = parseInt(arr[i + 1]);
+
+                        if (operator === "+") {
+                            result = result + num;
+                        } else if (operator === "-") {
+                            result = result - num;
+                        }
+                    }
+
+                    input.innerHTML = result;
+                    string = result.toString();
                 }
-                input.innerHTML = string;
-            } 
-            catch {
+                else {
+                    input.innerHTML = eval(expression);
+                    string = eval(expression).toString();
+                }
+            }
+            catch (e) {
                 input.innerHTML = "Error";
                 string = "";
             }
         } 
-        else if (buttonText === 'C') {
+        else if (buttonText === "C") {
             string = "";
             input.innerHTML = "0";
         } 
-        else if (button.classList.contains('backspace')) { 
-            string = string.slice(0, -1); 
+        else if (button.classList.contains('backspace')) {
+            string = string.slice(0, -1);
             input.innerHTML = string || "0";
         } 
         else {
@@ -42,15 +70,3 @@ Array.from(buttons).forEach((button) => {
         }
     });
 });
-buttons.forEach(button => {
-    button.addEventListener('mousedown', () => {
-        button.classList.add('active');
-    });
-    button.addEventListener('mouseup', () => {
-        button.classList.remove('active');
-    });
-    button.addEventListener('mouseup', () => {
-        button.classList.remove('active');
-    });
-});
-
